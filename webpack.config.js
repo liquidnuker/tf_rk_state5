@@ -2,26 +2,21 @@ const path = require('path');
 const webpack = require('webpack');
 const Promise = require('es6-promise').Promise;
 
+const glob = require('glob-all');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const extractCSS = new ExtractTextPlugin('[name].bundle.css');
-
-// const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
-//   template: './client/index.html',
-//   filename: 'index.html',
-//   inject: 'body'
-// });
+const PurifyCSSPlugin = require('purifycss-webpack');
+const extractCSS = new ExtractTextPlugin('../[name].bundle.css');
 
 module.exports = {
   context: path.resolve(__dirname, './src'),
-  entry: {
-    index: './index.jsx'
-      // vendor: ['jquery', 'lodash']
-  },
+  // Map, Set, requestAnimationFrame <IE11 polyfill
+  // entry: ['babel-polyfill', './index.jsx'],
+  entry: ['./index.jsx'],
   output: {
     path: path.resolve(__dirname, './dist'),
-    // publicPath: path.resolve(__dirname, './dist'),
-    filename: '[name].bundle.js'
+    publicPath: "dist/",
+    filename: '[name].bundle.js',
+    chunkFilename: '[id].chunk.js'
   },
   module: {
     rules: [
@@ -29,6 +24,16 @@ module.exports = {
       {
         test: /\.scss$/,
         loader: extractCSS.extract(['css-loader', 'sass-loader'])
+      },
+      // url loader
+      {
+        test: /\.(png|svg|jpg|otf|ttf)$/,
+        use: [{
+          loader: 'url-loader',
+          options: {
+            limit: 10000
+          } // Convert images < 10k to base64 strings
+        }]
       },
       // babel-loader
       {
@@ -44,23 +49,23 @@ module.exports = {
       }
     ]
   },
+  externals : {
+    React: 'react',
+    ReactDOM: 'react-dom'
+  },
   plugins: [
-    // HtmlWebpackPluginConfig,
-    // extractCSS,
-    // size reducer
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': JSON.stringify('production')
-      }
-    }),
-    // merge chunks
-    // new webpack.optimize.AggressiveMergingPlugin()
+    extractCSS,
+    new PurifyCSSPlugin({
+      // Give paths to parse for rules. These should be absolute!
+      paths: glob.sync([
+        path.join(__dirname, '*.html'),
+        path.join(__dirname, 'src/components/*.jsx')
+      ]),
+    })
   ],
   resolve: {
     modules: [
       '../node_modules',
-      // 'D:/WINDOWS/GD2/web/dev/_npm/libs/jquery_3.1.1/node_modules',
-      // 'D:/WINDOWS/GD2/web/dev/_npm/utils/lodash_4.17.4/node_modules'
     ]
   }
 };

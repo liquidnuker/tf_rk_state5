@@ -1,5 +1,5 @@
-import React from "react";
-import ReactDOM from "react-dom";
+// import React from "react";
+// import ReactDOM from "react-dom";
 
 import {store} from "./js/store.js";
 import Component1 from "./js/component1.jsx"

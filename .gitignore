@@ -1,7 +1,7 @@
 ##
 notes.txt
 *.glue
-dist
+temp
 
 ### OSX ###
 *.DS_Store
